@@ -1,0 +1,412 @@
+"use client";
+
+import { useState } from "react";
+import { CheckCircle, Clock, Star, ChevronDown } from "lucide-react";
+
+export default function PTFunnel() {
+  const [form, setForm] = useState({ name: "", email: "", phone: "", goal: "" });
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [error, setError] = useState("");
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    setStatus("loading");
+    setError("");
+
+    try {
+      const res = await fetch("/api/lead", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(form),
+      });
+
+      if (!res.ok) throw new Error("Submission failed");
+
+      const { bookingUrl } = await res.json();
+      setStatus("success");
+
+      // Redirect to booking after short delay
+      setTimeout(() => {
+        window.location.href = bookingUrl;
+      }, 1500);
+    } catch {
+      setStatus("error");
+      setError("Something went wrong. Please try again.");
+    }
+  }
+
+  return (
+    <main style={{ background: "#0E0E0E", minHeight: "100vh" }}>
+
+      {/* HERO */}
+      <section style={{ background: "#0E0E0E", padding: "60px 20px 40px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+          <div style={{
+            display: "inline-block",
+            background: "#EC4899",
+            color: "#fff",
+            fontSize: 12,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "6px 16px",
+            borderRadius: 999,
+            marginBottom: 20,
+          }}>
+            Private Training · Townsville
+          </div>
+
+          <h1 style={{
+            fontFamily: "var(--font-bebas)",
+            fontSize: "clamp(44px, 10vw, 80px)",
+            lineHeight: 1,
+            color: "#fff",
+            textTransform: "uppercase",
+            marginBottom: 16,
+          }}>
+            Train 1-on-1<br />
+            <span style={{ color: "#EC4899" }}>With a Champion</span>
+          </h1>
+
+          <p style={{
+            fontSize: 18,
+            color: "#ccc",
+            lineHeight: 1.6,
+            marginBottom: 32,
+            maxWidth: 500,
+            margin: "0 auto 32px",
+          }}>
+            Private Muay Thai sessions with WMO State Champion Joseph Gabiola.
+            Technique, strategy, and conditioning — built around you.
+          </p>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", marginBottom: 40 }}>
+            {[
+              { icon: "🥊", text: "30-min focused sessions" },
+              { icon: "🏆", text: "WMO State Champion coach" },
+              { icon: "📍", text: "Soul Lab Gym, Townsville" },
+            ].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, color: "#ccc", fontSize: 14 }}>
+                <span>{item.icon}</span>
+                <span>{item.text}</span>
+              </div>
+            ))}
+          </div>
+
+          <a href="#book" style={{
+            display: "inline-block",
+            background: "#EC4899",
+            color: "#fff",
+            fontWeight: 700,
+            fontSize: 16,
+            padding: "16px 36px",
+            borderRadius: 0,
+            textDecoration: "none",
+            letterSpacing: "0.05em",
+            textTransform: "uppercase",
+          }}>
+            Book Your Session →
+          </a>
+        </div>
+      </section>
+
+      {/* SCROLL INDICATOR */}
+      <div style={{ textAlign: "center", padding: "8px 0 40px", color: "#555", animation: "bounce 2s infinite" }}>
+        <ChevronDown size={24} />
+      </div>
+
+      {/* WHAT YOU GET */}
+      <section style={{ background: "#F8F5F0", padding: "60px 20px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <span style={{
+              background: "#0E0E0E",
+              color: "#EC4899",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              padding: "5px 14px",
+              borderRadius: 999,
+              marginBottom: 12,
+              display: "inline-block",
+            }}>
+              What You Get
+            </span>
+            <h2 style={{
+              fontFamily: "var(--font-bebas)",
+              fontSize: "clamp(32px, 6vw, 54px)",
+              color: "#0E0E0E",
+              textTransform: "uppercase",
+              lineHeight: 1.05,
+            }}>
+              Every Session Is Built Around You
+            </h2>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 24 }}>
+            {[
+              { title: "Technique Breakdown", desc: "Fix the fundamentals that hold you back. Every pad, punch, and kick drilled with purpose." },
+              { title: "Ring IQ & Strategy", desc: "Learn how to think in a fight. Distance, timing, counters — the stuff you can't learn in a group class." },
+              { title: "Conditioning That Counts", desc: "30 minutes of high-output, targeted training. No filler. No wasted time." },
+              { title: "Personalised Plan", desc: "Whether you're a beginner or preparing to fight — every session is mapped to your goals." },
+            ].map((item, i) => (
+              <div key={i} style={{
+                background: "#fff",
+                padding: "24px",
+                borderLeft: "3px solid #EC4899",
+              }}>
+                <h3 style={{ fontWeight: 700, color: "#0E0E0E", marginBottom: 8, fontSize: 16 }}>{item.title}</h3>
+                <p style={{ color: "#555", fontSize: 14, lineHeight: 1.6, margin: 0 }}>{item.desc}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* SOCIAL PROOF */}
+      <section style={{ background: "#0E0E0E", padding: "60px 20px" }}>
+        <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+          <span style={{
+            color: "#EC4899",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            marginBottom: 12,
+            display: "inline-block",
+          }}>
+            What Members Say
+          </span>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginTop: 32 }}>
+            {[
+              { name: "Mike T.", quote: "One session with Joseph taught me more about technique than months of group classes. Absolutely worth it." },
+              { name: "Sarah L.", quote: "He picks apart exactly what you're doing wrong and fixes it fast. My confidence in sparring went through the roof." },
+            ].map((t, i) => (
+              <div key={i} style={{
+                background: "#1a1a1a",
+                padding: "28px",
+                textAlign: "left",
+                borderTop: "2px solid #EC4899",
+              }}>
+                <p style={{ color: "#EC4899", fontSize: 36, lineHeight: 1, margin: "0 0 12px" }}>"</p>
+                <p style={{ color: "#ddd", fontSize: 15, lineHeight: 1.7, fontStyle: "italic", margin: "0 0 16px" }}>{t.quote}</p>
+                <p style={{ color: "#888", fontSize: 13, fontWeight: 700, margin: 0 }}>— {t.name}</p>
+              </div>
+            ))}
+          </div>
+
+          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 28 }}>
+            {[...Array(5)].map((_, i) => (
+              <Star key={i} size={18} fill="#EC4899" color="#EC4899" />
+            ))}
+          </div>
+          <p style={{ color: "#888", fontSize: 13, marginTop: 8 }}>5.0 Google Rating · Soul Lab Gym</p>
+        </div>
+      </section>
+
+      {/* PRICING */}
+      <section style={{ background: "#F8F5F0", padding: "60px 20px" }}>
+        <div style={{ maxWidth: 560, margin: "0 auto", textAlign: "center" }}>
+          <span style={{
+            background: "#0E0E0E",
+            color: "#EC4899",
+            fontSize: 11,
+            fontWeight: 700,
+            letterSpacing: "0.12em",
+            textTransform: "uppercase",
+            padding: "5px 14px",
+            borderRadius: 999,
+            marginBottom: 12,
+            display: "inline-block",
+          }}>
+            Pricing
+          </span>
+          <h2 style={{
+            fontFamily: "var(--font-bebas)",
+            fontSize: "clamp(32px, 6vw, 54px)",
+            color: "#0E0E0E",
+            textTransform: "uppercase",
+            marginBottom: 32,
+          }}>
+            Simple & Straightforward
+          </h2>
+
+          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 16 }}>
+            <div style={{ background: "#fff", padding: "28px 20px", border: "2px solid #e0ddd8" }}>
+              <p style={{ color: "#888", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>Single Session</p>
+              <p style={{ fontFamily: "var(--font-bebas)", fontSize: 52, color: "#0E0E0E", margin: 0, lineHeight: 1 }}>$50</p>
+              <p style={{ color: "#888", fontSize: 13, margin: "8px 0 0" }}>30 minutes</p>
+            </div>
+            <div style={{ background: "#0E0E0E", padding: "28px 20px", border: "2px solid #EC4899", position: "relative" }}>
+              <div style={{
+                position: "absolute",
+                top: -12,
+                left: "50%",
+                transform: "translateX(-50%)",
+                background: "#EC4899",
+                color: "#fff",
+                fontSize: 10,
+                fontWeight: 700,
+                letterSpacing: "0.1em",
+                textTransform: "uppercase",
+                padding: "3px 10px",
+              }}>
+                Best Value
+              </div>
+              <p style={{ color: "#EC4899", fontSize: 12, fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.1em", margin: "0 0 8px" }}>5-Pack</p>
+              <p style={{ fontFamily: "var(--font-bebas)", fontSize: 52, color: "#fff", margin: 0, lineHeight: 1 }}>$40</p>
+              <p style={{ color: "#888", fontSize: 13, margin: "8px 0 0" }}>per session · save $50</p>
+            </div>
+          </div>
+
+          <div style={{ display: "flex", flexDirection: "column", gap: 10, marginTop: 28, textAlign: "left" }}>
+            {[
+              "No lock-in contracts",
+              "All fitness levels welcome",
+              "Equipment provided",
+              "Flexible scheduling",
+            ].map((item, i) => (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 10 }}>
+                <CheckCircle size={16} color="#EC4899" />
+                <span style={{ color: "#333", fontSize: 14 }}>{item}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* FORM */}
+      <section id="book" style={{ background: "#0E0E0E", padding: "60px 20px" }}>
+        <div style={{ maxWidth: 520, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <span style={{
+              color: "#EC4899",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+              display: "inline-block",
+            }}>
+              Claim Your Spot
+            </span>
+            <h2 style={{
+              fontFamily: "var(--font-bebas)",
+              fontSize: "clamp(32px, 6vw, 54px)",
+              color: "#fff",
+              textTransform: "uppercase",
+              lineHeight: 1.05,
+              marginBottom: 12,
+            }}>
+              Book Your First Session
+            </h2>
+            <p style={{ color: "#888", fontSize: 15 }}>
+              Fill in your details and we'll take you straight to the booking calendar.
+            </p>
+          </div>
+
+          {status === "success" ? (
+            <div style={{ textAlign: "center", padding: "40px 20px" }}>
+              <CheckCircle size={48} color="#EC4899" style={{ margin: "0 auto 16px" }} />
+              <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 8 }}>You're in!</h3>
+              <p style={{ color: "#888" }}>Taking you to the booking calendar now...</p>
+            </div>
+          ) : (
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
+              {[
+                { label: "Full Name", key: "name", type: "text", placeholder: "Your name", required: true },
+                { label: "Email Address", key: "email", type: "email", placeholder: "your@email.com", required: true },
+                { label: "Phone Number", key: "phone", type: "tel", placeholder: "04xx xxx xxx", required: true },
+              ].map((field) => (
+                <div key={field.key}>
+                  <label style={{ display: "block", color: "#ccc", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                    {field.label}
+                  </label>
+                  <input
+                    type={field.type}
+                    placeholder={field.placeholder}
+                    required={field.required}
+                    value={form[field.key as keyof typeof form]}
+                    onChange={(e) => setForm({ ...form, [field.key]: e.target.value })}
+                    style={{
+                      width: "100%",
+                      padding: "14px 16px",
+                      background: "#1a1a1a",
+                      border: "1px solid #333",
+                      color: "#fff",
+                      fontSize: 15,
+                      outline: "none",
+                    }}
+                  />
+                </div>
+              ))}
+
+              <div>
+                <label style={{ display: "block", color: "#ccc", fontSize: 13, fontWeight: 600, marginBottom: 6 }}>
+                  What's your main goal? (optional)
+                </label>
+                <select
+                  value={form.goal}
+                  onChange={(e) => setForm({ ...form, goal: e.target.value })}
+                  style={{
+                    width: "100%",
+                    padding: "14px 16px",
+                    background: "#1a1a1a",
+                    border: "1px solid #333",
+                    color: form.goal ? "#fff" : "#666",
+                    fontSize: 15,
+                    outline: "none",
+                  }}
+                >
+                  <option value="">Select a goal...</option>
+                  <option value="Learn the basics">Learn the basics</option>
+                  <option value="Improve my technique">Improve my technique</option>
+                  <option value="Prepare for competition">Prepare for competition</option>
+                  <option value="Fitness & conditioning">Fitness & conditioning</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+
+              {error && (
+                <p style={{ color: "#f87171", fontSize: 13, margin: 0 }}>{error}</p>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === "loading"}
+                style={{
+                  background: status === "loading" ? "#555" : "#EC4899",
+                  color: "#fff",
+                  fontWeight: 700,
+                  fontSize: 16,
+                  padding: "16px",
+                  border: "none",
+                  cursor: status === "loading" ? "not-allowed" : "pointer",
+                  textTransform: "uppercase",
+                  letterSpacing: "0.05em",
+                  marginTop: 8,
+                }}
+              >
+                {status === "loading" ? "Submitting..." : "Confirm & Book My Session →"}
+              </button>
+
+              <p style={{ color: "#555", fontSize: 12, textAlign: "center", margin: 0 }}>
+                No spam. No lock-ins. Just one step closer to your first session.
+              </p>
+            </form>
+          )}
+        </div>
+      </section>
+
+      {/* FOOTER */}
+      <footer style={{ background: "#0a0a0a", padding: "24px 20px", textAlign: "center", borderTop: "1px solid #1a1a1a" }}>
+        <p style={{ color: "#555", fontSize: 13, margin: 0 }}>
+          © 2026 Soul Lab Gym · Townsville, QLD ·{" "}
+          <a href="https://soullabgym.com" style={{ color: "#EC4899", textDecoration: "none" }}>soullabgym.com</a>
+        </p>
+      </footer>
+
+    </main>
+  );
+}

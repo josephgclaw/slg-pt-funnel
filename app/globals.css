@@ -1,0 +1,19 @@
+@import "tailwindcss";
+
+:root {
+  --slg-pink: #EC4899;
+  --slg-dark: #0E0E0E;
+  --slg-bone: #F8F5F0;
+  --slg-gold: #D4A017;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #0E0E0E;
+  color: #ffffff;
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+}
