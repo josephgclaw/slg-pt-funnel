@@ -191,20 +191,28 @@ export default function PTFunnel() {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 48 }}>
             {[
               {
+                name: "Mark Lawler",
+                quote: "Started here in February 2025 with no experience in any combat sports. Couldn't throw a punch or even stand correctly. The coaches at this gym — especially Joey — gave me the confidence and ability to complete my first 3 week Muay Thai camp.",
+              },
+              {
+                name: "Stephanie Pen",
+                quote: "Started at Soul Lab Gym as a complete beginner, knew absolutely nothing about the sport. Any worries or doubts I had about Muay Thai disappeared instantly. The gym classes provide a more personal feel — I never felt lost.",
+              },
+              {
                 name: "Sam Blanch",
                 quote: "Hands down the best experience for legitimate, authentic, intense Muay Thai training that you will struggle to find anywhere else in Townsville. Joe is a trainer that will push you to become the best version of yourself.",
               },
               {
-                name: "Shannon Mein",
-                quote: "Authentic Muay Thai Training. Just like Thailand. The Head Coach Joe has a genuine passion for teaching traditional Muay Thai and he invests his time in his students to help them grow.",
+                name: "Noah Richardson",
+                quote: "Love training at Soul Lab! Awesome coach, great vibes and a real family feel. Everyone's super welcoming, pushes each other and makes training Muay Thai fun but challenging. Best gym I've been to!",
               },
               {
-                name: "Tee",
-                quote: "These guys are amazing!!! Such a family welcoming vibe. You can tell this place is built from the heart — good vibes, respect & love!! Recommend 💯",
+                name: "Taryn Durocher",
+                quote: "I'm really happy with the structure of the classes. They really match the structure of a Muay Thai gym in Thailand. The classes are super fun and challenging. The coaches are very friendly and supportive.",
               },
               {
-                name: "Jillian",
-                quote: "My first session at Soul Lab Muay Thai gym was fantastic with Joseph and the team. I felt so welcomed and comfortable. Highly recommend to anyone starting at all ages.",
+                name: "Emily Maxwell",
+                quote: "Tried out Soul Lab for a free trial day — absolutely fell in love with the workout, the teaching, the service, everything. I couldn't be happier to go back each week and learn new skills with such great teachers.",
               },
             ].map((t, i) => (
               <div key={i} style={{
@@ -233,7 +241,7 @@ export default function PTFunnel() {
             gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
             gap: 16,
           }}>
-            {Array.from({ length: 10 }, (_, i) => (
+            {Array.from({ length: 20 }, (_, i) => (
               <img
                 key={i}
                 src={`/review-${i + 1}.jpg`}
