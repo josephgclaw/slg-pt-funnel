@@ -5,6 +5,7 @@ import { Resend } from "resend";
 const SPREADSHEET_ID = process.env.LEADS_SHEET_ID || "1SqntbSf_QFuZ26D-QoMo-rPRztl_DTMD6QUdkSFAQ7w";
 const BOOKING_URL = process.env.BOOKING_URL || "https://go.ziplinks.com.au/widget/booking/1qa6SnkbDyWZD8NwtVCB";
 const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "joseph@soullabgym.com";
+const NOTIFY_SMS = process.env.NOTIFY_SMS || null;
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
 async function getSheets() {
@@ -42,10 +43,11 @@ export async function POST(req: NextRequest) {
 
     // Send email notification
     if (resend) {
+      const recipients = [NOTIFY_EMAIL, ...(NOTIFY_SMS ? [NOTIFY_SMS] : [])];
       await resend.emails.send({
-        from: "Soul Lab Gym <notifications@soullabgym.com>",
-        to: [NOTIFY_EMAIL],
-        subject: `🥊 New PT Lead: ${name}`,
+        from: "Soul Lab Gym <onboarding@resend.dev>",
+        to: recipients,
+        subject: `New PT Lead: ${name} ${phone}`,
         html: `
           <div style="font-family: sans-serif; max-width: 500px;">
             <h2 style="color: #EC4899; margin-bottom: 4px;">New PT Enquiry</h2>
