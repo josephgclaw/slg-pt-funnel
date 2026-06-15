@@ -38,31 +38,66 @@ export default function PTFunnel() {
   return (
     <main style={{ background: "#0E0E0E", minHeight: "100vh" }}>
 
-      {/* HERO */}
-      <section style={{ background: "#0E0E0E", padding: "60px 20px 40px" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
+      {/* HERO — full bleed photo */}
+      <section style={{
+        position: "relative",
+        minHeight: "100svh",
+        display: "flex",
+        alignItems: "center",
+        overflow: "hidden",
+      }}>
+        {/* Background photo */}
+        <img
+          src="/hero-belt.jpg"
+          alt="Joseph Gabiola WMO State Champion"
+          style={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            objectFit: "cover",
+            objectPosition: "center top",
+          }}
+        />
+        {/* Dark gradient overlay */}
+        <div style={{
+          position: "absolute",
+          inset: 0,
+          background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.65) 50%, rgba(0,0,0,0.3) 100%)",
+        }} />
+        {/* Content */}
+        <div style={{
+          position: "relative",
+          zIndex: 10,
+          width: "100%",
+          maxWidth: 700,
+          margin: "0 auto",
+          padding: "100px 24px 80px",
+          textAlign: "center",
+        }}>
           <div style={{
             display: "inline-block",
             background: "#EC4899",
             color: "#fff",
-            fontSize: 12,
+            fontSize: 11,
             fontWeight: 700,
-            letterSpacing: "0.12em",
+            letterSpacing: "0.14em",
             textTransform: "uppercase",
             padding: "6px 16px",
             borderRadius: 999,
-            marginBottom: 20,
+            marginBottom: 24,
           }}>
             Private Training · Townsville
           </div>
 
           <h1 style={{
             fontFamily: "var(--font-bebas)",
-            fontSize: "clamp(44px, 10vw, 80px)",
-            lineHeight: 1,
+            fontSize: "clamp(52px, 12vw, 96px)",
+            lineHeight: 0.95,
             color: "#fff",
             textTransform: "uppercase",
-            marginBottom: 16,
+            marginBottom: 20,
+            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
           }}>
             Train 1-on-1<br />
             <span style={{ color: "#EC4899" }}>With a Champion</span>
@@ -70,23 +105,23 @@ export default function PTFunnel() {
 
           <p style={{
             fontSize: 18,
-            color: "#ccc",
-            lineHeight: 1.6,
-            marginBottom: 32,
-            maxWidth: 500,
+            color: "rgba(255,255,255,0.85)",
+            lineHeight: 1.65,
+            maxWidth: 480,
             margin: "0 auto 32px",
+            textShadow: "0 1px 8px rgba(0,0,0,0.6)",
           }}>
             Private Muay Thai sessions with WMO State Champion Joseph Gabiola.
             Technique, strategy, and conditioning — built around you.
           </p>
 
-          <div style={{ display: "flex", justifyContent: "center", gap: 24, flexWrap: "wrap", marginBottom: 40 }}>
+          <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", marginBottom: 36 }}>
             {[
               { icon: "🥊", text: "30-min focused sessions" },
               { icon: "🏆", text: "WMO State Champion coach" },
               { icon: "📍", text: "Soul Lab Gym, Townsville" },
             ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, color: "#ccc", fontSize: 14 }}>
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
                 <span>{item.icon}</span>
                 <span>{item.text}</span>
               </div>
@@ -98,22 +133,28 @@ export default function PTFunnel() {
             background: "#EC4899",
             color: "#fff",
             fontWeight: 700,
-            fontSize: 16,
-            padding: "16px 36px",
-            borderRadius: 0,
+            fontSize: 17,
+            padding: "18px 40px",
             textDecoration: "none",
-            letterSpacing: "0.05em",
+            letterSpacing: "0.06em",
             textTransform: "uppercase",
+            boxShadow: "0 4px 24px rgba(236,72,153,0.4)",
           }}>
             Book Your Session →
           </a>
         </div>
-      </section>
 
-      {/* SCROLL INDICATOR */}
-      <div style={{ textAlign: "center", padding: "8px 0 40px", color: "#555", animation: "bounce 2s infinite" }}>
-        <ChevronDown size={24} />
-      </div>
+        {/* Scroll hint */}
+        <div style={{
+          position: "absolute",
+          bottom: 24,
+          left: "50%",
+          transform: "translateX(-50%)",
+          color: "rgba(255,255,255,0.4)",
+        }}>
+          <ChevronDown size={28} />
+        </div>
+      </section>
 
       {/* WHAT YOU GET */}
       <section style={{ background: "#F8F5F0", padding: "60px 20px" }}>
@@ -325,6 +366,29 @@ export default function PTFunnel() {
                 <span style={{ color: "#333", fontSize: 14 }}>{item}</span>
               </div>
             ))}
+          </div>
+        </div>
+      </section>
+
+      {/* COACH SECTION */}
+      <section style={{ background: "#0E0E0E", padding: "60px 20px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 48, alignItems: "center" }}>
+          <img
+            src="/hero-portrait.jpg"
+            alt="Joseph Gabiola, head coach Soul Lab Gym"
+            style={{ width: "100%", maxWidth: 340, borderTop: "4px solid #EC4899", display: "block" }}
+          />
+          <div>
+            <span style={{ color: "#EC4899", fontSize: 11, fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase", marginBottom: 12, display: "block" }}>Your Coach</span>
+            <h2 style={{ fontFamily: "var(--font-bebas)", fontSize: "clamp(36px, 6vw, 56px)", color: "#fff", textTransform: "uppercase", lineHeight: 1.05, marginBottom: 16 }}>
+              Joseph Gabiola
+            </h2>
+            <p style={{ color: "#aaa", fontSize: 15, lineHeight: 1.75, marginBottom: 20 }}>
+              WMO Queensland State Champion and head coach at Soul Lab Gym. Joseph has trained in Thailand and competed at the highest levels of Australian Muay Thai.
+            </p>
+            <p style={{ color: "#aaa", fontSize: 15, lineHeight: 1.75, marginBottom: 0 }}>
+              Whether you&apos;re a complete beginner or an experienced fighter, every session is built around your goals — not a generic program.
+            </p>
           </div>
         </div>
       </section>
