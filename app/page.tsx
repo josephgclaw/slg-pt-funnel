@@ -164,44 +164,89 @@ export default function PTFunnel() {
         </div>
       </section>
 
-      {/* SOCIAL PROOF */}
-      <section style={{ background: "#0E0E0E", padding: "60px 20px" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto", textAlign: "center" }}>
-          <span style={{
-            color: "#EC4899",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.12em",
-            textTransform: "uppercase",
-            marginBottom: 12,
-            display: "inline-block",
-          }}>
-            What Members Say
-          </span>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 20, marginTop: 32 }}>
+      {/* SOCIAL PROOF - FEATURED QUOTES */}
+      <section style={{ background: "#0E0E0E", padding: "60px 20px 40px" }}>
+        <div style={{ maxWidth: 760, margin: "0 auto" }}>
+          <div style={{ textAlign: "center", marginBottom: 40 }}>
+            <span style={{
+              color: "#EC4899",
+              fontSize: 11,
+              fontWeight: 700,
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              marginBottom: 12,
+              display: "inline-block",
+            }}>
+              Google Reviews
+            </span>
+            <div style={{ display: "flex", justifyContent: "center", gap: 4, margin: "8px 0" }}>
+              {[...Array(5)].map((_, i) => (
+                <Star key={i} size={20} fill="#EC4899" color="#EC4899" />
+              ))}
+            </div>
+            <p style={{ color: "#888", fontSize: 14, margin: "4px 0 0" }}>5.0 rating · 55+ reviews · Soul Lab Gym Townsville</p>
+          </div>
+
+          {/* Featured pull quotes */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(300px, 1fr))", gap: 20, marginBottom: 48 }}>
             {[
-              { name: "Mike T.", quote: "One session with Joseph taught me more about technique than months of group classes. Absolutely worth it." },
-              { name: "Sarah L.", quote: "He picks apart exactly what you're doing wrong and fixes it fast. My confidence in sparring went through the roof." },
+              {
+                name: "Sam Blanch",
+                quote: "Hands down the best experience for legitimate, authentic, intense Muay Thai training that you will struggle to find anywhere else in Townsville. Joe is a trainer that will push you to become the best version of yourself.",
+              },
+              {
+                name: "Shannon Mein",
+                quote: "Authentic Muay Thai Training. Just like Thailand. The Head Coach Joe has a genuine passion for teaching traditional Muay Thai and he invests his time in his students to help them grow.",
+              },
+              {
+                name: "Tee",
+                quote: "These guys are amazing!!! Such a family welcoming vibe. You can tell this place is built from the heart — good vibes, respect & love!! Recommend 💯",
+              },
+              {
+                name: "Jillian",
+                quote: "My first session at Soul Lab Muay Thai gym was fantastic with Joseph and the team. I felt so welcomed and comfortable. Highly recommend to anyone starting at all ages.",
+              },
             ].map((t, i) => (
               <div key={i} style={{
-                background: "#1a1a1a",
-                padding: "28px",
-                textAlign: "left",
-                borderTop: "2px solid #EC4899",
+                background: "#141414",
+                padding: "28px 24px",
+                borderTop: "3px solid #EC4899",
               }}>
-                <p style={{ color: "#EC4899", fontSize: 36, lineHeight: 1, margin: "0 0 12px" }}>"</p>
-                <p style={{ color: "#ddd", fontSize: 15, lineHeight: 1.7, fontStyle: "italic", margin: "0 0 16px" }}>{t.quote}</p>
-                <p style={{ color: "#888", fontSize: 13, fontWeight: 700, margin: 0 }}>— {t.name}</p>
+                <p style={{ color: "#EC4899", fontSize: 40, lineHeight: 1, margin: "0 0 10px", fontFamily: "Georgia, serif" }}>&ldquo;</p>
+                <p style={{ color: "#ddd", fontSize: 15, lineHeight: 1.75, fontStyle: "italic", margin: "0 0 16px" }}>{t.quote}</p>
+                <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+                  <div style={{ display: "flex", gap: 2 }}>
+                    {[...Array(5)].map((_, i) => <Star key={i} size={12} fill="#EC4899" color="#EC4899" />)}
+                  </div>
+                  <p style={{ color: "#666", fontSize: 13, fontWeight: 700, margin: 0 }}>— {t.name}</p>
+                </div>
               </div>
             ))}
           </div>
 
-          <div style={{ display: "flex", justifyContent: "center", gap: 4, marginTop: 28 }}>
-            {[...Array(5)].map((_, i) => (
-              <Star key={i} size={18} fill="#EC4899" color="#EC4899" />
+          {/* All screenshot reviews */}
+          <div style={{ textAlign: "center", marginBottom: 24 }}>
+            <p style={{ color: "#555", fontSize: 13, textTransform: "uppercase", letterSpacing: "0.1em", fontWeight: 700 }}>More from our community</p>
+          </div>
+          <div style={{
+            display: "grid",
+            gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))",
+            gap: 16,
+          }}>
+            {Array.from({ length: 10 }, (_, i) => (
+              <img
+                key={i}
+                src={`/review-${i + 1}.jpg`}
+                alt={`Soul Lab Gym Google review ${i + 1}`}
+                style={{
+                  width: "100%",
+                  borderRadius: 8,
+                  display: "block",
+                  border: "1px solid #1f1f1f",
+                }}
+              />
             ))}
           </div>
-          <p style={{ color: "#888", fontSize: 13, marginTop: 8 }}>5.0 Google Rating · Soul Lab Gym</p>
         </div>
       </section>
 
