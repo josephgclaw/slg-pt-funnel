@@ -56,7 +56,7 @@ export default function PTFunnel() {
             width: "100%",
             height: "100%",
             objectFit: "cover",
-            objectPosition: "center top",
+            objectPosition: "center center",
           }}
         />
         {/* Dark gradient overlay */}
@@ -375,7 +375,7 @@ export default function PTFunnel() {
         <div style={{ maxWidth: 760, margin: "0 auto", display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: 48, alignItems: "center" }}>
           <img
             src="/hero-portrait.jpg"
-            alt="Joseph Gabiola, head coach Soul Lab Gym"
+            alt="Joseph Gabiola WMO Champion with belt"
             style={{ width: "100%", maxWidth: 340, borderTop: "4px solid #EC4899", display: "block" }}
           />
           <div>
