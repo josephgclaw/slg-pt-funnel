@@ -1,11 +1,19 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Script from "next/script";
 import { CheckCircle, Clock, Star, ChevronDown } from "lucide-react";
 
 export default function PTFunnel() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goal: "" });
+
+  // Pre-fill from localStorage on first load
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem("slg_pt_lead");
+      if (saved) setForm(f => ({ ...f, ...JSON.parse(saved) }));
+    } catch {}
+  }, []);
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
 
@@ -24,6 +32,8 @@ export default function PTFunnel() {
       if (!res.ok) throw new Error("Submission failed");
 
       await res.json();
+      // Save details for future visits
+      try { localStorage.setItem("slg_pt_lead", JSON.stringify(form)); } catch {}
       setStatus("success");
 
       // Scroll to calendar
