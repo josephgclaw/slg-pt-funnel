@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Script from "next/script";
 import { CheckCircle, Clock, Star, ChevronDown } from "lucide-react";
 
 export default function PTFunnel() {
@@ -22,13 +23,13 @@ export default function PTFunnel() {
 
       if (!res.ok) throw new Error("Submission failed");
 
-      const { bookingUrl } = await res.json();
+      await res.json();
       setStatus("success");
 
-      // Redirect to booking after short delay
+      // Scroll to calendar
       setTimeout(() => {
-        window.location.href = bookingUrl;
-      }, 1500);
+        document.getElementById("booking-calendar")?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
     } catch {
       setStatus("error");
       setError("Something went wrong. Please try again.");
@@ -36,6 +37,7 @@ export default function PTFunnel() {
   }
 
   return (
+    <>
     <main style={{ background: "#0E0E0E", minHeight: "100vh" }}>
 
       {/* HERO — full bleed photo */}
@@ -424,10 +426,16 @@ export default function PTFunnel() {
           </div>
 
           {status === "success" ? (
-            <div style={{ textAlign: "center", padding: "40px 20px" }}>
-              <CheckCircle size={48} color="#EC4899" style={{ margin: "0 auto 16px" }} />
-              <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 8 }}>You're in!</h3>
-              <p style={{ color: "#888" }}>Taking you to the booking calendar now...</p>
+            <div id="booking-calendar" style={{ textAlign: "center", padding: "24px 0 0" }}>
+              <CheckCircle size={32} color="#EC4899" style={{ margin: "0 auto 12px" }} />
+              <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 4 }}>Details saved — now pick your time 👇</h3>
+              <p style={{ color: "#888", fontSize: 14, marginBottom: 24 }}>Choose a session time that works for you below.</p>
+              <iframe
+                src="https://api.soullabgym.com/widget/booking/KFzQKVSItlRNhOcZL8Tn"
+                style={{ width: "100%", border: "none", overflow: "hidden", minHeight: 600, borderRadius: 8 }}
+                scrolling="no"
+                id="KFzQKVSItlRNhOcZL8Tn_1781967187957"
+              />
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -525,5 +533,7 @@ export default function PTFunnel() {
       </footer>
 
     </main>
+    <Script src="https://api.soullabgym.com/js/form_embed.js" strategy="lazyOnload" />
+    </>
   );
 }
