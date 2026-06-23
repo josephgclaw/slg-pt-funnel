@@ -1,6 +1,43 @@
 import { NextRequest, NextResponse } from "next/server";
 import { google } from "googleapis";
 import { Resend } from "resend";
+import { createHash } from "crypto";
+
+const META_PIXEL_ID = "2559980727754440";
+const META_ACCESS_TOKEN = process.env.META_ACCESS_TOKEN || "";
+
+function sha256(value: string): string {
+  return createHash("sha256").update(value.trim().toLowerCase()).digest("hex");
+}
+
+async function sendMetaLeadEvent(email: string, phone: string) {
+  if (!META_ACCESS_TOKEN) return;
+  const eventTime = Math.floor(Date.now() / 1000);
+  const userData: Record<string, string[]> = {
+    em: [sha256(email)],
+  };
+  // Normalise phone: strip non-digits, prepend AU country code if needed
+  const digits = phone.replace(/\D/g, "");
+  const normPhone = digits.startsWith("61") ? digits : `61${digits.replace(/^0/, "")}`;
+  if (normPhone.length >= 10) userData.ph = [sha256(normPhone)];
+
+  await fetch(
+    `https://graph.facebook.com/v20.0/${META_PIXEL_ID}/events?access_token=${META_ACCESS_TOKEN}`,
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        data: [{
+          event_name: "Lead",
+          event_time: eventTime,
+          action_source: "website",
+          event_source_url: "https://pt.soullabgym.com",
+          user_data: userData,
+        }],
+      }),
+    }
+  ).catch(console.error);
+}
 
 const SPREADSHEET_ID = process.env.LEADS_SHEET_ID || "1SqntbSf_QFuZ26D-QoMo-rPRztl_DTMD6QUdkSFAQ7w";
 const BOOKING_URL = process.env.BOOKING_URL || "https://go.ziplinks.com.au/widget/booking/1qa6SnkbDyWZD8NwtVCB";
@@ -40,6 +77,9 @@ export async function POST(req: NextRequest) {
         values: [[now, name, email, phone, goal || "", "PT Funnel"]],
       },
     });
+
+    // Fire Meta Conversions API Lead event (server-side)
+    sendMetaLeadEvent(email, phone).catch(console.error);
 
     // Send email notification
     if (resend) {

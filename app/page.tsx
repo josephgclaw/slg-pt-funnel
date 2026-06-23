@@ -36,6 +36,11 @@ export default function PTFunnel() {
       try { localStorage.setItem("slg_pt_lead", JSON.stringify(form)); } catch {}
       setStatus("success");
 
+      // Fire Meta Pixel Lead event
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead");
+      }
+
       // Scroll to calendar
       setTimeout(() => {
         document.getElementById("booking-calendar")?.scrollIntoView({ behavior: "smooth" });
