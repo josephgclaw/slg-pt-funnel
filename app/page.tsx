@@ -441,7 +441,7 @@ export default function PTFunnel() {
               <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 4 }}>Details saved — now pick your time 👇</h3>
               <p style={{ color: "#888", fontSize: 14, marginBottom: 24 }}>Choose a session time that works for you below.</p>
               <iframe
-                src="https://api.soullabgym.com/widget/booking/KFzQKVSItlRNhOcZL8Tn"
+                src="https://go.ziplinks.com.au/widget/bookings/30min-pt"
                 style={{ width: "100%", border: "none", overflow: "hidden", minHeight: 600, borderRadius: 8 }}
                 scrolling="no"
                 id="KFzQKVSItlRNhOcZL8Tn_1781967187957"
