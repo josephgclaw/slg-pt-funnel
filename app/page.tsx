@@ -1,8 +1,23 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Script from "next/script";
 import { CheckCircle, Clock, Star, ChevronDown } from "lucide-react";
+
+const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "fbclid"] as const;
+const ATTRIBUTION_STORAGE_KEY = "slg_pt_attribution";
+
+function readCookie(name: string): string {
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : "";
+}
+
+function getAttribution(): Record<string, string> {
+  try {
+    return JSON.parse(sessionStorage.getItem(ATTRIBUTION_STORAGE_KEY) || "{}");
+  } catch {
+    return {};
+  }
+}
 
 export default function PTFunnel() {
   const [form, setForm] = useState({ name: "", email: "", phone: "", goal: "" });
@@ -14,37 +29,80 @@ export default function PTFunnel() {
       if (saved) setForm(f => ({ ...f, ...JSON.parse(saved) }));
     } catch {}
   }, []);
+
+  // Capture UTMs + fbclid from the landing URL and keep them for this browser session
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const found: Record<string, string> = {};
+      for (const key of ATTRIBUTION_KEYS) {
+        const v = params.get(key);
+        if (v) found[key] = v;
+      }
+      if (Object.keys(found).length) {
+        // A new ad click replaces the previous attribution as a whole
+        sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify({ ...found, captured_at: String(Date.now()) }));
+      }
+    } catch {}
+  }, []);
+
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [error, setError] = useState("");
+  const [bookingUrl, setBookingUrl] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (status === "loading" || status === "success") return;
     setStatus("loading");
     setError("");
+
+    // One ID shared by the browser Lead and the server (Conversions API) Lead so Meta counts it once
+    const eventId =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+    const attribution = getAttribution();
+    let fbc = readCookie("_fbc");
+    if (!fbc && attribution.fbclid) {
+      fbc = `fb.1.${attribution.captured_at || Date.now()}.${attribution.fbclid}`;
+    }
 
     try {
       const res = await fetch("/api/lead", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify({
+          ...form,
+          attribution,
+          eventId,
+          fbp: readCookie("_fbp"),
+          fbc,
+          pageUrl: window.location.href,
+        }),
       });
 
-      if (!res.ok) throw new Error("Submission failed");
-
-      await res.json();
-      // Save details for future visits
-      try { localStorage.setItem("slg_pt_lead", JSON.stringify(form)); } catch {}
-      setStatus("success");
-
-      // Fire Meta Pixel Lead event
-      if (typeof window !== "undefined" && (window as any).fbq) {
-        (window as any).fbq("track", "Lead");
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok || !data.bookingUrl) {
+        setStatus("error");
+        setError(data.error || "Something went wrong. Please try again.");
+        return;
       }
 
-      // Scroll to calendar
+      // Save details for future visits
+      try { localStorage.setItem("slg_pt_lead", JSON.stringify(form)); } catch {}
+      setBookingUrl(data.bookingUrl);
+      setStatus("success");
+
+      // Fire Meta Pixel Lead event (once, deduplicated with the server event)
+      if (typeof window !== "undefined" && (window as any).fbq) {
+        (window as any).fbq("track", "Lead", {}, { eventID: eventId });
+      }
+
+      // Short pause so the pixel request goes out, then on to the booking calendar
       setTimeout(() => {
-        document.getElementById("booking-calendar")?.scrollIntoView({ behavior: "smooth" });
-      }, 300);
+        window.location.href = data.bookingUrl;
+      }, 400);
     } catch {
       setStatus("error");
       setError("Something went wrong. Please try again.");
@@ -444,13 +502,10 @@ export default function PTFunnel() {
             <div id="booking-calendar" style={{ textAlign: "center", padding: "24px 0 0" }}>
               <CheckCircle size={32} color="#EC4899" style={{ margin: "0 auto 12px" }} />
               <h3 style={{ color: "#fff", fontWeight: 700, marginBottom: 4 }}>Details saved — now pick your time 👇</h3>
-              <p style={{ color: "#888", fontSize: 14, marginBottom: 24 }}>Choose a session time that works for you below.</p>
-              <iframe
-                src="https://go.ziplinks.com.au/widget/bookings/30min-pt"
-                style={{ width: "100%", border: "none", overflow: "hidden", minHeight: 600, borderRadius: 8 }}
-                scrolling="no"
-                id="KFzQKVSItlRNhOcZL8Tn_1781967187957"
-              />
+              <p style={{ color: "#888", fontSize: 14, marginBottom: 24 }}>
+                Taking you to the booking calendar…{" "}
+                <a href={bookingUrl} style={{ color: "#EC4899" }}>Tap here if it doesn&apos;t open</a>
+              </p>
             </div>
           ) : (
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 16 }}>
@@ -548,7 +603,6 @@ export default function PTFunnel() {
       </footer>
 
     </main>
-    <Script src="https://api.soullabgym.com/js/form_embed.js" strategy="lazyOnload" />
     </>
   );
 }
