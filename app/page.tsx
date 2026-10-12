@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { CheckCircle, Clock, Star, ChevronDown } from "lucide-react";
+import { CheckCircle, Star } from "lucide-react";
 
 const ATTRIBUTION_KEYS = ["utm_source", "utm_medium", "utm_campaign", "utm_content", "fbclid"] as const;
 const ATTRIBUTION_STORAGE_KEY = "slg_pt_attribution";
@@ -42,6 +42,39 @@ export default function PTFunnel() {
       if (Object.keys(found).length) {
         // A new ad click replaces the previous attribution as a whole
         sessionStorage.setItem(ATTRIBUTION_STORAGE_KEY, JSON.stringify({ ...found, captured_at: String(Date.now()) }));
+      }
+    } catch {}
+  }, []);
+
+  // Sticky "Book" bar on phones: shows once the hero is scrolled past, hides again at the form
+  const [showSticky, setShowSticky] = useState(false);
+  useEffect(() => {
+    const hero = document.querySelector(".pt-hero");
+    const book = document.getElementById("book");
+    if (!hero || !book || !("IntersectionObserver" in window)) return;
+    let heroVisible = true;
+    let bookVisible = false;
+    const update = () => setShowSticky(!heroVisible && !bookVisible);
+    const io = new IntersectionObserver((entries) => {
+      for (const e of entries) {
+        if (e.target === hero) heroVisible = e.isIntersecting;
+        if (e.target === book) bookVisible = e.isIntersecting;
+      }
+      update();
+    }, { threshold: 0 });
+    io.observe(hero);
+    io.observe(book);
+    return () => io.disconnect();
+  }, []);
+
+  // Respect reduced-motion: keep the hero on its still frame
+  useEffect(() => {
+    try {
+      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        document.querySelectorAll<HTMLVideoElement>(".pt-hero__video").forEach((v) => {
+          v.removeAttribute("autoplay");
+          v.pause();
+        });
       }
     } catch {}
   }, []);
@@ -113,127 +146,54 @@ export default function PTFunnel() {
     <>
     <main style={{ background: "#0E0E0E", minHeight: "100vh" }}>
 
-      {/* HERO — full bleed photo */}
-      <section style={{
-        position: "relative",
-        minHeight: "100svh",
-        display: "flex",
-        alignItems: "center",
-        overflow: "hidden",
-      }}>
-        {/* Background photo */}
-        <img
-          src="/hero-belt.jpg"
-          alt="Joseph Gabiola WMO State Champion"
-          style={{
-            position: "absolute",
-            inset: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-            objectPosition: "center center",
-          }}
-        />
-        {/* Dark gradient overlay */}
-        <div style={{
-          position: "absolute",
-          inset: 0,
-          background: "linear-gradient(to right, rgba(0,0,0,0.88) 0%, rgba(0,0,0,0.65) 50%, rgba(0,0,0,0.3) 100%)",
-        }} />
-        {/* Content */}
-        <div style={{
-          position: "relative",
-          zIndex: 10,
-          width: "100%",
-          maxWidth: 700,
-          margin: "0 auto",
-          padding: "100px 24px 80px",
-          textAlign: "center",
-        }}>
-          <div style={{
-            display: "inline-block",
-            background: "#EC4899",
-            color: "#fff",
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: "0.14em",
-            textTransform: "uppercase",
-            padding: "6px 16px",
-            borderRadius: 999,
-            marginBottom: 24,
-          }}>
-            Private Training · Townsville
-          </div>
-
-          <h1 style={{
-            fontFamily: "var(--font-bebas)",
-            fontSize: "clamp(52px, 12vw, 96px)",
-            lineHeight: 0.95,
-            color: "#fff",
-            textTransform: "uppercase",
-            marginBottom: 20,
-            textShadow: "0 2px 20px rgba(0,0,0,0.5)",
-          }}>
-            Train 1-on-1<br />
-            <span style={{ color: "#EC4899" }}>With a Champion</span>
-          </h1>
-
-          <p style={{
-            fontSize: 18,
-            color: "rgba(255,255,255,0.85)",
-            lineHeight: 1.65,
-            maxWidth: 480,
-            margin: "0 auto 32px",
-            textShadow: "0 1px 8px rgba(0,0,0,0.6)",
-          }}>
-            Private Muay Thai sessions with WMO State Champion Joseph Gabiola.
-            Technique, strategy, and conditioning — built around you.
-          </p>
-
-          <div style={{ display: "flex", justifyContent: "center", gap: 20, flexWrap: "wrap", marginBottom: 36 }}>
-            {[
-              { icon: "🥊", text: "30-min focused sessions" },
-              { icon: "🏆", text: "WMO State Champion coach" },
-              { icon: "📍", text: "Soul Lab Gym, Townsville" },
-            ].map((item, i) => (
-              <div key={i} style={{ display: "flex", alignItems: "center", gap: 8, color: "rgba(255,255,255,0.8)", fontSize: 14 }}>
-                <span>{item.icon}</span>
-                <span>{item.text}</span>
-              </div>
-            ))}
-          </div>
-
-          <a href="#book" style={{
-            display: "inline-block",
-            background: "#EC4899",
-            color: "#fff",
-            fontWeight: 700,
-            fontSize: 17,
-            padding: "18px 40px",
-            textDecoration: "none",
-            letterSpacing: "0.06em",
-            textTransform: "uppercase",
-            boxShadow: "0 4px 24px rgba(236,72,153,0.4)",
-          }}>
-            Book Your Session →
-          </a>
+      {/* HERO — live pad-work loop. Phones: video on top, offer below. Desktop: offer left, video right. */}
+      <section className="pt-hero">
+        <div className="pt-hero__media">
+          <video
+            className="pt-hero__video"
+            src="/hero-pads.mp4"
+            poster="/hero-pads-poster.jpg"
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="auto"
+            aria-label="Joseph Gabiola holding pads for a student at Soul Lab Gym"
+          />
         </div>
 
-        {/* Scroll hint */}
-        <div style={{
-          position: "absolute",
-          bottom: 24,
-          left: "50%",
-          transform: "translateX(-50%)",
-          color: "rgba(255,255,255,0.4)",
-        }}>
-          <ChevronDown size={28} />
+        <div className="pt-hero__copy">
+          <p className="pt-hero__kicker">Private Muay Thai in Townsville</p>
+          <h1 className="pt-hero__title">Train 1-on-1 with a champion</h1>
+          <p className="pt-hero__lede">
+            30 minutes on the pads with Joseph Gabiola, WMO Queensland State Champion.
+            Technique, timing and conditioning, built around you.
+          </p>
+
+          <a href="#book" className="pt-hero__cta">Book your first session</a>
+
+          <div className="pt-hero__facts">
+            <span><strong>$50</strong> per session</span>
+            <span><strong>30</strong> minutes</span>
+            <span className="pt-hero__stars" aria-label="5.0 out of 5 from 55+ Google reviews">
+              <span aria-hidden="true">★★★★★</span> 55+ Google reviews
+            </span>
+          </div>
         </div>
       </section>
 
       {/* WHAT YOU GET */}
-      <section style={{ background: "#F8F5F0", padding: "60px 20px" }}>
-        <div style={{ maxWidth: 680, margin: "0 auto" }}>
+      <section style={{ background: "#F8F5F0", padding: "0 0 60px" }}>
+        <img
+          src="/coach-1on1-belly-pad.jpg"
+          alt="Joseph holding a belly pad and Thai pads for a client during a private session"
+          loading="lazy"
+          decoding="async"
+          width={1376}
+          height={768}
+          style={{ display: "block", width: "100%", maxHeight: 520, objectFit: "cover", objectPosition: "50% 30%" }}
+        />
+        <div style={{ maxWidth: 680, margin: "0 auto", padding: "48px 20px 0" }}>
           <div style={{ textAlign: "center", marginBottom: 40 }}>
             <span style={{
               background: "#0E0E0E",
@@ -362,6 +322,8 @@ export default function PTFunnel() {
                 key={i}
                 src={`/review-${i + 1}.jpg`}
                 alt={`Soul Lab Gym Google review ${i + 1}`}
+                loading="lazy"
+                decoding="async"
                 style={{
                   width: "100%",
                   borderRadius: 8,
@@ -602,6 +564,10 @@ export default function PTFunnel() {
         </p>
       </footer>
 
+      <div className="pt-sticky" data-show={showSticky ? "true" : "false"} aria-hidden={!showSticky}>
+        <p className="pt-sticky__text"><strong>1-on-1 with Joe</strong>$50 · 30 minutes</p>
+        <a href="#book" className="pt-sticky__cta" tabIndex={showSticky ? 0 : -1}>Book now</a>
+      </div>
     </main>
     </>
   );

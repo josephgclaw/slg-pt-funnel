@@ -17,3 +17,146 @@ body {
   font-family: 'Inter', sans-serif;
   margin: 0;
 }
+
+/* ── PT hero (video) ─────────────────────────────────────────────── */
+.pt-hero {
+  background: var(--slg-dark);
+  color: #fff;
+  display: flex;
+  flex-direction: column;
+}
+.pt-hero__media {
+  position: relative;
+  height: 56svh;
+  min-height: 340px;
+  overflow: hidden;
+  background: #000;
+}
+.pt-hero__media::after {
+  /* melt the bottom of the clip into the page so the headline sits on black */
+  content: "";
+  position: absolute;
+  inset: auto 0 0 0;
+  height: 38%;
+  background: linear-gradient(to bottom, rgba(14, 14, 14, 0), var(--slg-dark));
+  pointer-events: none;
+}
+.pt-hero__video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 40%;
+}
+.pt-hero__copy {
+  position: relative;
+  margin-top: -64px;
+  padding: 0 20px 32px;
+  z-index: 1;
+}
+.pt-hero__kicker {
+  color: var(--slg-pink);
+  font-size: 15px;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.pt-hero__title {
+  font-family: var(--font-bebas);
+  font-weight: 400;
+  font-size: clamp(54px, 15vw, 112px);
+  line-height: 0.9;
+  letter-spacing: 0.005em;
+  margin: 0 0 14px;
+  text-wrap: balance;
+}
+.pt-hero__lede {
+  color: rgba(255, 255, 255, 0.82);
+  font-size: 16px;
+  line-height: 1.55;
+  max-width: 34em;
+  margin: 0 0 22px;
+}
+.pt-hero__cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 58px;
+  padding: 0 28px;
+  background: var(--slg-pink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 18px;
+  text-decoration: none;
+  box-shadow: 0 6px 28px rgba(236, 72, 153, 0.35);
+  transition: transform 120ms ease, box-shadow 120ms ease;
+}
+.pt-hero__cta:hover { transform: translateY(-1px); box-shadow: 0 8px 32px rgba(236, 72, 153, 0.5); }
+.pt-hero__cta:active { transform: translateY(0); }
+.pt-hero__cta:focus-visible,
+.pt-sticky__cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+.pt-hero__facts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 18px;
+  margin-top: 16px;
+  color: rgba(255, 255, 255, 0.7);
+  font-size: 14px;
+}
+.pt-hero__facts strong { color: #fff; font-weight: 800; }
+.pt-hero__stars span { color: var(--slg-pink); letter-spacing: 1px; margin-right: 4px; }
+
+@media (min-width: 900px) {
+  .pt-hero {
+    flex-direction: row-reverse;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(40px, 6vw, 96px);
+    min-height: 100svh;
+    padding: 48px clamp(32px, 6vw, 96px);
+  }
+  .pt-hero__media {
+    flex: 0 0 auto;
+    height: min(84svh, 800px);
+    min-height: 0;
+    aspect-ratio: 9 / 16;
+    border-top: 4px solid var(--slg-pink);
+  }
+  .pt-hero__media::after { display: none; }
+  .pt-hero__copy { margin-top: 0; padding: 0; max-width: 560px; }
+  .pt-hero__cta { display: inline-flex; }
+  .pt-hero__lede { font-size: 18px; }
+}
+
+/* ── Sticky mobile book bar ──────────────────────────────────────── */
+.pt-sticky {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px calc(10px + env(safe-area-inset-bottom));
+  background: rgba(14, 14, 14, 0.96);
+  border-top: 1px solid #262626;
+  transform: translateY(110%);
+  transition: transform 200ms ease;
+}
+.pt-sticky[data-show="true"] { transform: translateY(0); }
+.pt-sticky__text { flex: 1; color: #ccc; font-size: 13px; line-height: 1.3; }
+.pt-sticky__text strong { color: #fff; display: block; font-size: 15px; }
+.pt-sticky__cta {
+  flex: 0 0 auto;
+  background: var(--slg-pink);
+  color: #fff;
+  font-weight: 800;
+  font-size: 15px;
+  padding: 13px 18px;
+  text-decoration: none;
+}
+@media (min-width: 900px) { .pt-sticky { display: none; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .pt-hero__cta, .pt-sticky { transition: none; }
+}

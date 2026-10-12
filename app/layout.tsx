@@ -14,7 +14,9 @@ export const metadata: Metadata = {
     description: "1-on-1 coaching with a WMO State Champion. Book your session today.",
     url: "https://pt.soullabgym.com",
     siteName: "Soul Lab Gym",
+    images: [{ url: "/og-pt.jpg", width: 1200, height: 630, alt: "Joseph Gabiola holding pads at Soul Lab Gym" }],
   },
+  metadataBase: new URL("https://pt.soullabgym.com"),
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
