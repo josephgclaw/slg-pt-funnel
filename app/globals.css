@@ -63,7 +63,7 @@ body {
 .pt-hero__title {
   font-family: var(--font-bebas);
   font-weight: 400;
-  font-size: clamp(54px, 15vw, 112px);
+  font-size: clamp(52px, 14vw, 104px);
   line-height: 0.9;
   letter-spacing: 0.005em;
   margin: 0 0 14px;

@@ -164,7 +164,7 @@ export default function PTFunnel() {
 
         <div className="pt-hero__copy">
           <p className="pt-hero__kicker">Private Muay Thai in Townsville</p>
-          <h1 className="pt-hero__title">Train 1-on-1 with a champion</h1>
+          <h1 className="pt-hero__title">Train <span style={{ whiteSpace: "nowrap" }}>1‑on‑1</span><br /> with a champion</h1>
           <p className="pt-hero__lede">
             30 minutes on the pads with Joseph Gabiola, WMO Queensland State Champion.
             Technique, timing and conditioning, built around you.
