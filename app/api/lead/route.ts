@@ -259,12 +259,11 @@ export async function POST(req: NextRequest) {
   }
 
   // Booking widget with prefill (URLSearchParams encodes + as %2B).
-  const bookingUrl = `${PT_BOOKING_URL}?${new URLSearchParams({
-    first_name: firstName,
-    last_name: lastName,
-    email,
-    phone,
-  }).toString()}`;
+  // The ZipLeads widget turns a "+" in the email into a space however it's encoded,
+  // so an email containing "+" isn't prefilled (the visitor types it instead).
+  const prefill: Record<string, string> = { first_name: firstName, last_name: lastName, phone };
+  if (!email.includes("+")) prefill.email = email;
+  const bookingUrl = `${PT_BOOKING_URL}?${new URLSearchParams(prefill).toString()}`;
 
   // Side effects that shouldn't delay the redirect. after() keeps them alive on Vercel.
   const ip = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim();
