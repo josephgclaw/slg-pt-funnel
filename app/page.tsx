@@ -67,16 +67,22 @@ export default function PTFunnel() {
     return () => io.disconnect();
   }, []);
 
-  // Respect reduced-motion: keep the hero on its still frame
+  // Hero video: React doesn't write `muted` into the server HTML and iOS only autoplays muted
+  // video, so set it and start playback here. Reduced-motion users keep the still frame.
   useEffect(() => {
-    try {
-      if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-        document.querySelectorAll<HTMLVideoElement>(".pt-hero__video").forEach((v) => {
-          v.removeAttribute("autoplay");
-          v.pause();
-        });
-      }
-    } catch {}
+    const v = document.querySelector<HTMLVideoElement>(".pt-hero__video");
+    if (!v) return;
+    v.muted = true;
+    v.defaultMuted = true;
+    v.setAttribute("muted", "");
+    let reduce = false;
+    try { reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches; } catch {}
+    if (reduce) {
+      v.removeAttribute("autoplay");
+      v.pause();
+      return;
+    }
+    v.play().catch(() => {});
   }, []);
 
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
