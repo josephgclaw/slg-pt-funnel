@@ -366,13 +366,10 @@ export async function POST(req: NextRequest) {
     }).catch((e) => console.error("Meta CAPI error:", e));
 
     if (resend) {
+      // One send per recipient: Resend rejects the whole message if any one
+      // recipient isn't allowed (e.g. the SMS gateway while on resend.dev).
       const recipients = [NOTIFY_EMAIL, ...(NOTIFY_SMS ? [NOTIFY_SMS] : [])];
-      await resend.emails
-        .send({
-          from: "Soul Lab Gym <onboarding@resend.dev>",
-          to: recipients,
-          subject: `New PT Lead: ${name} ${phone}`,
-          html: `
+      const html = `
             <div style="font-family: sans-serif; max-width: 500px;">
               <h2 style="color: #EC4899; margin-bottom: 4px;">New PT Enquiry</h2>
               <p style="color: #888; margin-top: 0;">Just submitted via pt.soullabgym.com</p>
@@ -389,12 +386,22 @@ export async function POST(req: NextRequest) {
                 <a href="tel:${escapeHtml(phone)}" style="background: #0E0E0E; color: white; padding: 10px 20px; text-decoration: none; display: inline-block;">Call Now</a>
               </p>
             </div>
-          `,
-        })
-        .then((r) => {
-          if (r?.error) console.error("Resend error:", r.error);
-        })
-        .catch((e) => console.error("Resend error:", e));
+          `;
+      await Promise.all(
+        recipients.map((to) =>
+          resend.emails
+            .send({
+              from: "Soul Lab Gym <onboarding@resend.dev>",
+              to,
+              subject: `New PT Lead: ${name} ${phone}`,
+              html,
+            })
+            .then((r) => {
+              if (r?.error) console.error(`Resend error (${to === NOTIFY_EMAIL ? "email" : "sms"}):`, r.error);
+            })
+            .catch((e) => console.error("Resend error:", e)),
+        ),
+      );
     }
   });
 
