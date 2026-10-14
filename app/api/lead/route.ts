@@ -42,7 +42,7 @@ const PT_BOOKING_URL =
   process.env.PT_BOOKING_URL || "https://go.ziplinks.com.au/widget/booking/WaYjxqt9zkFdFSl8Kzgl";
 
 const SPREADSHEET_ID = process.env.LEADS_SHEET_ID || "1SqntbSf_QFuZ26D-QoMo-rPRztl_DTMD6QUdkSFAQ7w";
-const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "joseph@soullabgym.com";
+const NOTIFY_EMAIL = process.env.NOTIFY_EMAIL || "josephgabiola@gmail.com";
 const NOTIFY_SMS = process.env.NOTIFY_SMS || null;
 const resend = process.env.RESEND_API_KEY ? new Resend(process.env.RESEND_API_KEY) : null;
 
@@ -93,6 +93,22 @@ async function zipleads(path: string, init: RequestInit) {
   return body;
 }
 
+type ZLContact = { id: string; firstName?: string; lastName?: string; email?: string; phone?: string; tags?: string[] };
+
+async function findContact(by: "email" | "number", value: string): Promise<ZLContact | null> {
+  const q = new URLSearchParams({ locationId: ZIPLEADS_LOCATION_ID, [by]: value });
+  const res = await zipleads(`/contacts/search/duplicate?${q.toString()}`, { method: "GET" });
+  return res?.contact?.id ? (res.contact as ZLContact) : null;
+}
+
+/**
+ * Finds or creates the ZipLeads contact WITHOUT overwriting anyone's identity:
+ *  - Email match  → that contact. Name/phone are only filled in if blank.
+ *  - Phone match only (different or no email) → that contact, but name and email are left alone
+ *    (a shared family/work number must not rename someone else's record). What they typed goes in a note.
+ *  - No match → new contact.
+ * Then: attribution fields, PT tags, a note, and an open opportunity in the PT pipeline.
+ */
 async function sendToZipLeads(lead: {
   firstName: string;
   lastName: string;
@@ -111,37 +127,104 @@ async function sendToZipLeads(lead: {
   }
   if (lead.goal) customFields.push({ id: FIELD_IDS.pt_goal, field_value: lead.goal });
 
-  const upsert = await zipleads("/contacts/upsert", {
-    method: "POST",
-    body: JSON.stringify({
-      locationId: ZIPLEADS_LOCATION_ID,
-      firstName: lead.firstName,
-      lastName: lead.lastName,
-      email: lead.email,
-      phone: lead.phone,
-      source: "PT Funnel (pt.soullabgym.com)",
-      ...(customFields.length ? { customFields } : {}),
-    }),
-  });
+  const byEmail = await findContact("email", lead.email);
+  const byPhone = byEmail ? null : await findContact("number", lead.phone);
+  const existing = byEmail || byPhone;
+  let contactId: string;
+  let matchedBy: "email" | "phone" | "new";
 
-  const contactId: string | undefined = upsert?.contact?.id;
-  if (!contactId) throw new Error(`ZipLeads upsert returned no contact id: ${JSON.stringify(upsert)}`);
+  if (existing) {
+    contactId = existing.id;
+    matchedBy = byEmail ? "email" : "phone";
+    const update: Record<string, unknown> = {};
+    if (matchedBy === "email") {
+      // Same person by email: only fill gaps, never replace what's there.
+      if (!existing.firstName && lead.firstName) update.firstName = lead.firstName;
+      if (!existing.lastName && lead.lastName) update.lastName = lead.lastName;
+      if (!existing.phone && lead.phone) update.phone = lead.phone;
+    }
+    if (customFields.length) update.customFields = customFields;
+    if (Object.keys(update).length) {
+      await zipleads(`/contacts/${contactId}`, { method: "PUT", body: JSON.stringify(update) });
+    }
+  } else {
+    matchedBy = "new";
+    const created = await zipleads("/contacts/", {
+      method: "POST",
+      body: JSON.stringify({
+        locationId: ZIPLEADS_LOCATION_ID,
+        firstName: lead.firstName,
+        lastName: lead.lastName,
+        email: lead.email,
+        phone: lead.phone,
+        source: "PT Funnel (pt.soullabgym.com)",
+        ...(customFields.length ? { customFields } : {}),
+      }),
+    });
+    contactId = created?.contact?.id;
+    if (!contactId) throw new Error(`ZipLeads create returned no contact id: ${JSON.stringify(created)}`);
+  }
 
   // A tag that is already on the contact doesn't fire "Tag added" again, so a returning
   // lead would never re-enter the follow-up. Remove pt-lead first if it's there, then add.
-  const existingTags: string[] = Array.isArray(upsert?.contact?.tags) ? upsert.contact.tags : [];
-  if (existingTags.map((t) => t.toLowerCase()).includes(PT_LEAD_TAG)) {
-    await zipleads(`/contacts/${contactId}/tags`, {
-      method: "DELETE",
-      body: JSON.stringify({ tags: [PT_LEAD_TAG] }),
-    });
+  const existingTags = (existing?.tags || []).map((t) => t.toLowerCase());
+  if (existingTags.includes(PT_LEAD_TAG)) {
+    await zipleads(`/contacts/${contactId}/tags`, { method: "DELETE", body: JSON.stringify({ tags: [PT_LEAD_TAG] }) });
   }
-  await zipleads(`/contacts/${contactId}/tags`, {
-    method: "POST",
-    body: JSON.stringify({ tags: PT_TAGS }),
-  });
+  await zipleads(`/contacts/${contactId}/tags`, { method: "POST", body: JSON.stringify({ tags: PT_TAGS }) });
+
+  // Keep exactly what was typed, so nothing is lost when an existing contact wasn't renamed.
+  const when = new Date().toLocaleString("en-AU", { timeZone: "Australia/Brisbane" });
+  const noteLines = [
+    `PT form (pt.soullabgym.com) – ${when}`,
+    `Name: ${lead.firstName} ${lead.lastName}`.trim(),
+    `Email: ${lead.email}`,
+    `Phone: ${lead.phone}`,
+    lead.goal ? `Goal: ${lead.goal}` : "",
+    [lead.attribution.utm_source, lead.attribution.utm_campaign, lead.attribution.utm_content].filter(Boolean).length
+      ? `Source: ${[lead.attribution.utm_source, lead.attribution.utm_campaign, lead.attribution.utm_content].filter(Boolean).join(" / ")}`
+      : "",
+    matchedBy === "phone"
+      ? "Matched an existing contact by PHONE only, so their name and email were NOT changed. Check whether this is the same person."
+      : "",
+  ].filter(Boolean);
+  await zipleads(`/contacts/${contactId}/notes`, { method: "POST", body: JSON.stringify({ body: noteLines.join("\n") }) }).catch(
+    (e) => console.error("ZipLeads note error:", e)
+  );
+
+  await ensurePtOpportunity(contactId, `${lead.firstName} ${lead.lastName}`.trim()).catch((e) =>
+    console.error("ZipLeads opportunity error:", e)
+  );
 
   return contactId;
+}
+
+// PT pipeline "PT" → stage "New PT Lead". Only creates one if the contact has no open PT opportunity,
+// so a returning lead or someone already booked isn't moved backwards.
+const PT_PIPELINE_ID = "6YBqswejH2gOZpoFy0PL";
+const PT_STAGE_NEW_LEAD = "3d29968f-1577-442d-9652-bf7a666b0b23";
+
+async function ensurePtOpportunity(contactId: string, name: string) {
+  const q = new URLSearchParams({
+    location_id: ZIPLEADS_LOCATION_ID,
+    contact_id: contactId,
+    pipeline_id: PT_PIPELINE_ID,
+    status: "open",
+  });
+  const found = await zipleads(`/opportunities/search?${q.toString()}`, { method: "GET" });
+  if (Array.isArray(found?.opportunities) && found.opportunities.length) return;
+  await zipleads("/opportunities/", {
+    method: "POST",
+    body: JSON.stringify({
+      locationId: ZIPLEADS_LOCATION_ID,
+      pipelineId: PT_PIPELINE_ID,
+      pipelineStageId: PT_STAGE_NEW_LEAD,
+      contactId,
+      name: name ? `PT – ${name}` : "PT lead",
+      status: "open",
+      source: "PT Funnel (pt.soullabgym.com)",
+    }),
+  });
 }
 
 async function getSheets() {
@@ -307,6 +390,9 @@ export async function POST(req: NextRequest) {
               </p>
             </div>
           `,
+        })
+        .then((r) => {
+          if (r?.error) console.error("Resend error:", r.error);
         })
         .catch((e) => console.error("Resend error:", e));
     }
